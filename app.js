@@ -26,7 +26,7 @@ app.get("/listings",async(req,res)=>{
   const allListing= await Listing.find({});
  res.render("listings/index", { allListing });
 
-});
+}); 
 
 // app.get('/testListing', async(req,res)=>{
 //     let sampleListing = new Listing({
