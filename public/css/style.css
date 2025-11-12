@@ -108,3 +108,11 @@ body{
     padding: 0.5rem !important;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
+.rounded-logo {
+  height: 6rem;
+  width:5rem;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 0.1rem;
+  /* spacing between logo and nav items */
+}

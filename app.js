@@ -5,6 +5,8 @@ const Listing=require('./models/listing.js');
 const path = require('path');
 const methodOverride=require('method-override');
 app.use(methodOverride('_method'));
+
+
 const ejs = require('ejs');
 const ejsMate=require('ejs-mate');
 app.engine('ejs',ejsMate);

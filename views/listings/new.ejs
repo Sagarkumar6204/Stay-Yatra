@@ -5,16 +5,16 @@
     <div class="col-8 offset-2 ">
       <br><br>
     <h3 class="mb-4">Create a New Listing</h3>
-    <form method="POST" action="/listings" class="p-4 bg-white rounded shadow-sm">
+    <form method="POST" action="/listings" class="p-4 bg-white rounded shadow-sm needs-validation" novalidate >
       
       <div class="mb-3">
         <label for="title" class="form-label">Title</label>
-        <input type="text" class="form-control" name="listing[title]" placeholder="Enter Title">
+        <input type="text" class="form-control" name="listing[title]" placeholder="Enter Title" required>
       </div>
 
       <div class="mb-3">
         <label for="description" class="form-label">Description</label>
-        <textarea name="listing[description]" class="form-control" rows="3"></textarea>
+        <textarea name="listing[description]" class="form-control" rows="3" required></textarea>
       </div>
 
       <div class="mb-3">
@@ -24,24 +24,24 @@
 
       <div class="mb-3">
         <label for="imageFilename" class="form-label">Image Filename</label>
-        <input type="text" class="form-control" name="listing[image][filename]" placeholder="Enter Filename">
+        <input type="text" class="form-control" name="listing[image][filename]" placeholder="Enter Filename" >
       </div>
 <div class="row">
  <div class="mb-3 col-md-4">
         <label for="price" class="form-label">Price</label>
-        <input type="number" class="form-control" name="listing[price]" placeholder="Enter Price">
+        <input type="number" class="form-control" name="listing[price]" placeholder="Enter Price" required>
       </div>
 
       <div class="mb-3 col-md-8">
         <label for="country" class="form-label">Country</label>
-        <input type="text" class="form-control" name="listing[country]" placeholder="Enter Country">
+        <input type="text" class="form-control" name="listing[country]" placeholder="Enter Country" required>
       </div>
 </div>
      
 
       <div class="mb-3">
         <label for="location" class="form-label">Location</label>
-        <input type="text" class="form-control" name="listing[location]" placeholder="Enter Location">
+        <input type="text" class="form-control" name="listing[location]" placeholder="Enter Location" required>
       </div>
 
       <button class="btn btn-dark add-btn mt-3" type="submit">Submit</button>
