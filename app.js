@@ -4,6 +4,9 @@ const mongoose = require('mongoose');
 const Listing=require('./models/listing.js');
 const path = require('path');
 const methodOverride=require('method-override');
+const wrapAsync=require('./utils/wrapAsync.js');
+const ExpressError=require('./utils/ExpressError.js');
+const { listingSchema } = require('./schema.js');
 app.use(methodOverride('_method'));
 
 
@@ -26,57 +29,72 @@ main().then(()=>{
     console.log("Error connecting to MongoDB",err);
 });
 
-app.get('/',(req,res)=>{
+const validateListing=(req,res,next)=>{
+    let {error}=listingSchema.validate(req.body);
+    console.log(error);
+    if(error){
+       
+        throw new ExpressError(400,error);
+    }else{
+        next();
+    }
+}
+
+
+app.get('/',wrapAsync(async(req,res)=>{
     res.send('Hello World!');
-})
+}));
 //index route for listings
-app.get("/listings",async(req,res)=>{
+app.get("/listings",wrapAsync(async(req,res)=>{
   const allListing= await Listing.find({});
  res.render("listings/index", { allListing });
 
-}); 
+})); 
 
 //new route
-app.get("/listings/new",(req,res)=>{
+app.get("/listings/new",wrapAsync(async(req,res)=>{
     res.render("listings/new");
-});
+}));
 
 //show Rouite
-app.get("/listings/:id",async(req,res)=>{
+app.get("/listings/:id",wrapAsync(async(req,res)=>{
     let {id}=req.params;
      const listing=await Listing.findById(id);
      res.render("listings/show",{listing});
-});
+}));
 //create route
-app.post("/listings",async(req,res)=>{
+app.post("/listings",validateListing,wrapAsync(async(req,res,next)=>{
     //let{title,description,price,location,country}=req.body;
-    let newListing=req.body.listing;
+    const newListing=req.body.listing;
+
     const listing=new Listing(newListing);
     await listing.save();
     res.redirect(`/listings/${listing._id}`);
-
-});
+}));
 
 //edit route
 // ✅ Route
-app.get("/listings/:id/edit", async (req, res) => {
+app.get("/listings/:id/edit",validateListing, wrapAsync(async (req, res) => {
   const { id } = req.params;
   const listing = await Listing.findById(id);
   res.render("listings/edit", { listing });
-});
-
-app.put("/listings/:id", async (req, res) => {
+}));
+//update route
+app.put("/listings/:id",validateListing,wrapAsync( async (req, res) => {
+    if(!req.body.listing){
+        throw new ExpressError(400,'Empty Listing Data');
+    }
 let {id}=req.params;
 await Listing.findByIdAndUpdate(id,{...req.body.listing});
 res.redirect(`/listings`);
-});
+}));
 
 //delete route
-app.delete("/listings/:id",async(req,res)=>{
+app.delete("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
 let{id}=req.params;
 await Listing.findByIdAndDelete(id);
 res.redirect("/listings");
-});
+}));
 
 // app.get('/testListing', async(req,res)=>{
 //     let sampleListing = new Listing({
@@ -93,6 +111,17 @@ res.redirect("/listings");
 //     res.send('Sample listing created and saved to database!');
 // });
 
+
+// app.all('*', (req, res, next) => {
+//   next(new ExpressError(404,'Page Not Found'));
+// });
+
+app.use((err,req,res,next)=>{
+    let{statusCode=500,message="something went wrong"}=err;
+    res.render('listings/error',{err});
+   // res.status(statusCode).send(message);
+    });
+    
 app.listen(port,(req,res)=>{ //test karne ke liye
     console.log(`Server is running on port ${port}`);
 });
