@@ -54,7 +54,7 @@ body{
   font-size: 1rem;
 }
 /* cards */
-.card{
+.lisitng-card{
     border: none !important;
     margin-bottom: 2rem;
 }
