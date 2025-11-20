@@ -1,23 +1,73 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const Listing=require('./models/listing.js');
 const path = require('path');
 const methodOverride=require('method-override');
-const wrapAsync=require('./utils/wrapAsync.js');
-const ExpressError=require('./utils/ExpressError.js');
-const { listingSchema, reviewSchema } = require('./schema.js');
 app.use(methodOverride('_method'));
-const Review=require("./models/reviews.js");
-
+const listingRouter=require("./routes/listing.js")
+const userROuter=require("./routes/user.js");
 const ejs = require('ejs');
 const ejsMate=require('ejs-mate');
+const reviewRouter = require("./routes/review.js");
+const session=require("express-session");
+const flash=require("connect-flash");
+const passport=require("passport");
+const LocalStrategy=require("passport-local");
+const User=require("./models/user.js");
+
 app.engine('ejs',ejsMate);
 const port = 8080;
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'/views'));
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.urlencoded({extended:true}));//help to parse the form data
+
+const sessionOptions={
+    secret: "mysupersecretcode",
+    resave:false,
+    saveUninitialized:true,
+ cookie: {
+    maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days in ms
+    expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // optional
+    httpOnly:true,
+},
+};
+app.get("/",(req,res)=>{
+    res.send("I am Working!!")
+})
+//session create kiiya hai or niche flash jab kch operation perform ho tab
+app.use(session(sessionOptions));
+app.use(flash());
+
+//session phle fir intialize warna har baar login karwana padega jab page change hoga
+//passport ko phle intialize karna padta hai
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    next();
+});
+
+
+//demo user
+app.get("/demouser",async(req,res)=>{
+    let fakeUser=new User({
+        email:"Student@gmail.com",
+        username:"sagar-kumar"
+    });
+    //second parameter is Our password;
+    let registeredUser=await User.register(fakeUser, "helloWorldPassword");
+    res.send(registeredUser);
+
+    
+});
+
 const MONGO_URL = "mongodb://localhost:27017/stay-yatra";
 async function main(){
     await mongoose.connect(MONGO_URL);
@@ -29,116 +79,12 @@ main().then(()=>{
     console.log("Error connecting to MongoDB",err);
 });
 
-const validateListing=(req,res,next)=>{
-    let {error}=listingSchema.validate(req.body);
-    console.log(error);
-    if(error){
-       
-        throw new ExpressError(400,error);
-    }else{
-        next();
-    }
-}
-
-const validatereview=(req,res,next)=>{
-    let {error}=reviewSchema.validate(req.body);
-    console.log(error);
-    if(error){
-       
-        throw new ExpressError(400,error);
-    }else{
-        next();
-    }
-}
 
 
-app.get('/',wrapAsync(async(req,res)=>{
-    res.send('Hello World!');
-}));
-//index route for listings
-app.get("/listings",wrapAsync(async(req,res)=>{
-  const allListing= await Listing.find({});
- res.render("listings/index", { allListing });
+app.use("/listings",listingRouter);
+app.use("/listings/:id/reviews", reviewRouter);
+app.use("/",userROuter);
 
-})); 
-
-//new route
-app.get("/listings/new",wrapAsync(async(req,res)=>{
-    res.render("listings/new");
-}));
-
-//show Rouite
-app.get("/listings/:id",wrapAsync(async(req,res)=>{
-    let {id}=req.params;
-     const listing=await Listing.findById(id).populate("reviews");
-     res.render("listings/show",{listing});
-}));
-//create route
-app.post("/listings",validateListing,wrapAsync(async(req,res,next)=>{
-    //let{title,description,price,location,country}=req.body;
-    const newListing=req.body.listing;
-
-    const listing=new Listing(newListing);
-    await listing.save();
-    res.redirect(`/listings/${listing._id}`);
-}));
-
-//edit route
-// ✅ Route
-app.get("/listings/:id/edit",validateListing, wrapAsync(async (req, res) => {
-  const { id } = req.params;
-  const listing = await Listing.findById(id);
-  res.render("listings/edit", { listing });
-}));
-//update route
-app.put("/listings/:id",validateListing,wrapAsync( async (req, res) => {
-    if(!req.body.listing){
-        throw new ExpressError(400,'Empty Listing Data');
-    }
-let {id}=req.params;
-await Listing.findByIdAndUpdate(id,{...req.body.listing});
-res.redirect(`/listings`);
-}));
-
-//delete route
-app.delete("/listings/:id",validateListing,wrapAsync(async(req,res)=>{
-let{id}=req.params;
-await Listing.findByIdAndDelete(id);
-res.redirect("/listings");
-}));
-
-//reviews
-app.post("/listings/:id/reviews",validatereview,wrapAsync((async(req,res)=>{
-let listing=await Listing.findById(req.params.id);
-let newReview=new Review({
-    rating:req.body.review.rating,
-    comment:req.body.review.comment.trim()
-});
-listing.reviews.push(newReview);
-await newReview.save();
-await listing.save();
- res.redirect(`/listings/${listing._id}`);
-})));
-
-// app.get('/testListing', async(req,res)=>{
-//     let sampleListing = new Listing({
-//         title: "Cozy Apartment in Downtown",
-//         description: "A comfortable and modern apartment located in the heart of the city.",
-//         price: 120,
-//         location: "Downtown",
-//         country: "USA",
-        
-
-//     });
-//     await sampleListing.save();
-//     console.log("Sample listing saved to database");
-//     res.send('Sample listing created and saved to database!');
-// });
-
-
-// app.all('*', (req, res, next) => {
-//   next(new ExpressError(404,'Page Not Found'));
-// });
 
 app.use((err,req,res,next)=>{
     let{statusCode=500,message="something went wrong"}=err;
