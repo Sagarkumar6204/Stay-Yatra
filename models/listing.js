@@ -11,13 +11,10 @@ const listingSchema = new mongoose.Schema({
   image: {
     filename: String,
     url: {
-      type: String,
-      default: "https://png.pngtree.com/background/20230526/original/pngtree-sunset-in-ocean-palm-tree-clouds-natural-scene-wallpaper-picture-image_2742444.jpg",
-      set: (v) =>
-        v === ""
-          ? "https://png.pngtree.com/background/20230526/original/pngtree-sunset-in-ocean-palm-tree-clouds-natural-scene-wallpaper-picture-image_2742444.jpg"
-          : v,
-    },
+  type: String,
+   default: "https://png.pngtree.com/background/20230526/original/pngtree-sunset-in-ocean-palm-tree-clouds-natural-scene-wallpaper-picture-image_2742444.jpg",
+},
+
   },
   price: Number,
   location: String,

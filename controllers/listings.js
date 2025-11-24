@@ -56,18 +56,49 @@ module.exports.editRenderForm=async (req, res) => {
         req.flash("error", "Listing you requested for does not exist!");
        return res.redirect("/listings");
      }
-  res.render("listings/edit", { listing });
+     let originalImgUrl=listing.image.url;
+     originalImgUrl=originalImgUrl.replace("/upload", "/upload/h_300,w_250");
+  res.render("listings/edit", { listing,originalImgUrl });
 };
 
-module.exports.updateListings=async (req, res) => {
-    if(!req.body.listing){
-        throw new ExpressError(400,'Empty Listing Data');
-    }
-let {id}=req.params;
-await Listing.findByIdAndUpdate(id,{...req.body.listing});
-req.flash("success", "Listing Updated!");
-res.redirect(`/listings/${id}`);
+module.exports.updateListings = async (req, res) => {
+  if (!req.body.listing) {
+    throw new ExpressError(400, 'Empty Listing Data');
+  }
+
+  const { id } = req.params;
+
+  // OLD LISTING FETCH KARO
+  let listing = await Listing.findById(id);
+  if (!listing) throw new ExpressError(404, "Listing not found");
+
+  // TEXT FIELDS UPDATE KARO 
+  listing.title = req.body.listing.title;
+  listing.description = req.body.listing.description;
+  listing.price = req.body.listing.price;
+  listing.location = req.body.listing.location;
+  listing.country = req.body.listing.country;
+
+  // 🔥 MOST IMPORTANT PART:
+  // ONLY UPDATE IMAGE IF req.file EXISTS
+  if (req.file) {
+    listing.image = {
+      url: req.file.path,
+      filename: req.file.filename
+    };
+  }
+
+  // ❗ If NO new file → DO NOT TOUCH image field!
+  //   Old image safe rahegi.
+
+  await listing.save();
+
+  req.flash("success", "Listing Updated!");
+  res.redirect(`/listings/${id}`);
 };
+
+
+
 
 module.exports.destroy=async (req, res) => {
   let { id } = req.params;

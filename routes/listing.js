@@ -32,9 +32,10 @@ router
   .route("/:id")
   .get(wrapAsync(listingContorller.showListings))
   .put(
-    isLoggedIn,
+    
     isLoggedIn,
     isOwner,
+    upload.single('listing[image][url]'),
     validateListing,
     wrapAsync(listingContorller.updateListings)
   )
