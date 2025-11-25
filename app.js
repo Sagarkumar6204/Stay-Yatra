@@ -23,7 +23,7 @@ const LocalStrategy=require("passport-local");
 const User=require("./models/user.js");
 
 app.engine('ejs',ejsMate);
-const port = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8080;
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'/views'));
 app.use(express.static(path.join(__dirname,'public')));
@@ -64,10 +64,15 @@ const sessionOptions={
     httpOnly:true,
 },
 };
-app.get("/",(req,res)=>{
-    res.send("I am Working!!")
+app.get("/", async (req, res) => {
+  try {
+    const listings = await Listing.find({});
+    res.render("listings/index", { listings });
+  } catch (err) {
+    console.error("Error fetching listings:", err);
+    res.status(500).send("Something went wrong");
+  }
 });
-
 //session create kiiya hai or niche flash jab kch operation perform ho tab
 app.use(session(sessionOptions));
 app.use(flash());
@@ -115,6 +120,6 @@ app.use((err,req,res,next)=>{
    // res.status(statusCode).send(message);
     });
     
-app.listen(port,(req,res)=>{ //test karne ke liye
+app.listen(PORT,(req,res)=>{ //test karne ke liye
     console.log(`Server is running`);
 });
