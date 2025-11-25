@@ -43,24 +43,27 @@ main()
 // -------------------- Session Store --------------------
 const store = MongoStore.create({
   mongoUrl: MONGO_URL,
-  crypto: { secret: process.env.SECRET },
-  touchAfter: 24 * 3600,
+  crypto: {
+    secret: process.env.SECRET || "fallbacksecret"
+  },
+  touchAfter: 24 * 3600
 });
+
 store.on("error", (err) => {
   console.log("ERROR in MONGO SESSION STORE", err);
 });
 
 const sessionOptions = {
   store,
-  secret: process.env.SECRET,
+  secret: process.env.SECRET || "fallbacksecret",
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
-    maxAge: 5 * 24 * 60 * 60 * 1000, // 5 days
-    expires: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
     httpOnly: true,
-  },
+    maxAge: 5 * 24 * 60 * 60 * 1000
+  }
 };
+
 
 // -------------------- Middleware --------------------
 app.use(session(sessionOptions));
