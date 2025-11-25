@@ -119,5 +119,5 @@ app.use((err,req,res,next)=>{
     });
     
 app.listen(port,(req,res)=>{ //test karne ke liye
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server is running`);
 });
