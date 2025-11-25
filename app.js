@@ -23,7 +23,7 @@ const LocalStrategy=require("passport-local");
 const User=require("./models/user.js");
 
 app.engine('ejs',ejsMate);
-const port = process.env.PORT || 8080;
+const port = process.env.ATLASDB_URL || 8080;
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'/views'));
 app.use(express.static(path.join(__dirname,'public')));
