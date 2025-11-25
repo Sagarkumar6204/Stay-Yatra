@@ -95,14 +95,6 @@ app.get("/", async (req, res) => {
 });
 
 // -------------------- Demo User --------------------
-app.get("/demouser", async (req, res) => {
-  let fakeUser = new User({
-    email: "Student@gmail.com",
-    username: "sagar-kumar"
-  });
-  let registeredUser = await User.register(fakeUser, "helloWorldPassword");
-  res.send(registeredUser);
-});
 
 // -------------------- Routes --------------------
 app.use("/listings", listingRouter);
