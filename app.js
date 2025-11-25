@@ -84,22 +84,18 @@ app.use((req, res, next) => {
   next();
 });
 
-// -------------------- Home Route --------------------
-app.get("/", async (req, res) => {
-  try {
-    const listings = await Listing.find({});
-    res.render("listings/index", { listings });
-  } catch (err) {
-    res.status(500).send("Something went wrong");
-  }
-});
 
-// -------------------- Demo User --------------------
+// -------------------- Home Route --------------------
+app.get("/", (req, res) => {
+  res.redirect("/listings");
+});
 
 // -------------------- Routes --------------------
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
-app.use("/", userRouter);
+app.use("/user", userRouter);
+
+
 
 // -------------------- Error Handler --------------------
 app.use((err, req, res, next) => {
