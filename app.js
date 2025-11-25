@@ -16,6 +16,7 @@ const ejs = require('ejs');
 const ejsMate=require('ejs-mate');
 const reviewRouter = require("./routes/review.js");
 const session=require("express-session");
+const MongoStore=require('connect-mongo');
 const flash=require("connect-flash");
 const passport=require("passport");
 const LocalStrategy=require("passport-local");
@@ -28,8 +29,36 @@ app.set('views',path.join(__dirname,'/views'));
 app.use(express.static(path.join(__dirname,'public')));
 app.use(express.urlencoded({extended:true}));//help to parse the form data
 
+const MONGO_URL = process.env.ATLASDB_URL;
+
+async function main(){
+    await mongoose.connect(MONGO_URL,{
+         useNewUrlParser: true,
+  useUnifiedTopology: true
+    });
+}
+
+main().then(()=>{
+    console.log("Connected to MongoDB");
+}).catch((err)=>{
+    console.log("Error connecting to MongoDB",err);
+});
+
+
+const store=MongoStore.create({
+    mongoUrl:MONGO_URL,
+    crytpto:{
+        secret:process.env.SECRET,
+    },
+    touchAfter:24*3600,
+});
+store.on("error",()=>{
+    console.log("ERROR in MONGO SESSION STORE",err);
+})
+
 const sessionOptions={
-    secret: "mysupersecretcode",
+    store,
+    secret:process.env.SECRET,
     resave:false,
     saveUninitialized:true,
  cookie: {
@@ -38,9 +67,10 @@ const sessionOptions={
     httpOnly:true,
 },
 };
-app.get("/",(req,res)=>{
-    res.send("I am Working!!")
-})
+// app.get("/",(req,res)=>{
+//     res.send("I am Working!!")
+// })
+
 //session create kiiya hai or niche flash jab kch operation perform ho tab
 app.use(session(sessionOptions));
 app.use(flash());
@@ -73,17 +103,6 @@ app.get("/demouser",async(req,res)=>{
     res.send(registeredUser);
 
     
-});
-
-const MONGO_URL = "mongodb://localhost:27017/stay-yatra";
-async function main(){
-    await mongoose.connect(MONGO_URL);
-}
-
-main().then(()=>{
-    console.log("Connected to MongoDB");
-}).catch((err)=>{
-    console.log("Error connecting to MongoDB",err);
 });
 
 
