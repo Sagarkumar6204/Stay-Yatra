@@ -23,7 +23,7 @@ const LocalStrategy=require("passport-local");
 const User=require("./models/user.js");
 
 app.engine('ejs',ejsMate);
-const port = process.env.ATLASDB_URL || 8080;
+const port = process.env.PORT || 8080;
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'/views'));
 app.use(express.static(path.join(__dirname,'public')));
@@ -32,10 +32,7 @@ app.use(express.urlencoded({extended:true}));//help to parse the form data
 const MONGO_URL = process.env.ATLASDB_URL;
 
 async function main(){
-    await mongoose.connect(MONGO_URL,{
-         useNewUrlParser: true,
-  useUnifiedTopology: true
-    });
+    await mongoose.connect(MONGO_URL);
 }
 
 main().then(()=>{
@@ -47,7 +44,7 @@ main().then(()=>{
 
 const store=MongoStore.create({
     mongoUrl:MONGO_URL,
-    crytpto:{
+    crypto:{
         secret:process.env.SECRET,
     },
     touchAfter:24*3600,
@@ -67,9 +64,9 @@ const sessionOptions={
     httpOnly:true,
 },
 };
-// app.get("/",(req,res)=>{
-//     res.send("I am Working!!")
-// })
+app.get("/",(req,res)=>{
+    res.send("I am Working!!")
+});
 
 //session create kiiya hai or niche flash jab kch operation perform ho tab
 app.use(session(sessionOptions));
