@@ -17,7 +17,7 @@ router
   .post(
     isLoggedIn,
    
-     upload.single('listing[image][url]'),
+     upload.single('image'),
       validateListing,
      wrapAsync(listingContorller.createListing)
    );
