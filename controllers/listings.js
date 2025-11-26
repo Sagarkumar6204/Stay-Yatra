@@ -30,6 +30,9 @@ module.exports.showListings=async(req,res)=>{
 };
 
 module.exports.createListing = async (req, res) => {
+  console.log("REQ BODY:", req.body);
+console.log("REQ FILE:", req.file);
+
   try {
     const listing = new Listing(req.body.listing);
     listing.owner = req.user?._id;
