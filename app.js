@@ -99,8 +99,13 @@ app.use("/user", userRouter);
 
 // -------------------- Error Handler --------------------
 app.use((err, req, res, next) => {
-  let { statusCode = 500 } = err;
-  res.status(statusCode).render("listings/error", { err });
+  console.error("🔥 SERVER ERROR:", err);   // <-- Yeh log me RED error dikhayega
+
+  res.status(500).send(`
+    <h1>Server Error</h1>
+    <p>${err.message}</p>
+    <pre>${err.stack}</pre>
+  `);
 });
 
 // -------------------- Start Server --------------------
