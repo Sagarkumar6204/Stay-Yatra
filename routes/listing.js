@@ -34,7 +34,7 @@ router
     
     isLoggedIn,
     isOwner,
-    upload.single('listing[image][url]'),
+    upload.single('image'),
     validateListing,
     wrapAsync(listingContorller.updateListings)
   )
