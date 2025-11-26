@@ -13,7 +13,7 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: {
     folder: "stay_yatra_DEV",
-    allowedFormats: ["jpg", "png", "jpeg"],
+    allowedFormats: ["jpg", "png", "jpeg","webp"],
   },
 });
 
