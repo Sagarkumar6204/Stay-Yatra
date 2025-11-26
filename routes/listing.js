@@ -16,7 +16,6 @@ router
   .get(wrapAsync(listingContorller.index))
   .post(
     isLoggedIn,
-   
      upload.single('image'),
       validateListing,
      wrapAsync(listingContorller.createListing)
