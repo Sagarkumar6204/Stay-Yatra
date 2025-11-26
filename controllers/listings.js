@@ -30,23 +30,33 @@ module.exports.showListings=async(req,res)=>{
 };
 
 module.exports.createListing = async (req, res) => {
-  
-  const listing = new Listing(req.body.listing);
+  try {
+    const listing = new Listing(req.body.listing);
+    listing.owner = req.user?._id;
 
-  listing.owner = req.user._id;
+    if (req.file) {
+      listing.image = {
+        url: req.file.path,
+        filename: req.file.filename
+      };
+    } else {
+      listing.image = {
+        url: "https://res.cloudinary.com/demo/image/upload/v1720000000/default.jpg",
+        filename: "default"
+      };
+    }
 
-  listing.image = {
-    url: req.file.path,        // Cloudinary URL
-    filename: req.file.filename // Cloudinary public_id
-  };
+    // IMPORTANT: Save the document
+    await listing.save();
 
-  await listing.save();
-  console.log(listing);
-
-  req.flash("success", "New Listing Created!");
-  res.redirect("/listings");
+    req.flash("success", "New Listing Created!");
+    res.redirect("/listings");
+  } catch (err) {
+    console.error("Error creating listing:", err);
+    req.flash("error", "Listing create failed. Please check required fields and image upload.");
+    res.redirect("/listings/new");
+  }
 };
-
 
 module.exports.editRenderForm=async (req, res) => {
   const { id } = req.params;
